@@ -16,57 +16,77 @@ void TestCaseServer::quit()
 
 //QString TestCaseServer::reqTestFromClient(const int testType)
 //QString TestCaseServer::reqTestFromClient(const TestCaseMessage &msg)
-QString TestCaseServer::reqTestFromClient(const QByteArray &msg)
+QByteArray TestCaseServer::reqTestFromClient(const QByteArray &msg)
 {
-    fprintf(stderr, "start reqTestFromClient in TC_Server\n");
+	responseMsg.resize(RESP_INDEX_MAX_SIZE);
+    qDebug() << "start reqTestFromClient in TC_Server";
+
     //int testType = msg.getMessageID();
     int testType = msg[REQ_INDEX_MESSAGE_ID];
-    fprintf(stderr, "testType : %d\n", testType);
+    qDebug() <<  "testType : " << testType;
+	responseMsg[RESP_INDEX_MESSAGE_ID] = msg[REQ_INDEX_MESSAGE_ID];
+	responseMsg[RESP_INDEX_MESSAGE_TYPE] = msg[REQ_INDEX_MESSAGE_TYPE];
+	responseMsg[RESP_INDEX_TESTCASE_ID] = msg[REQ_INDEX_TESTCASE_ID];
+
+	qDebug() << Q_FUNC_INFO << "message ID : " << responseMsg[RESP_INDEX_MESSAGE_ID];
+	qDebug() << Q_FUNC_INFO << "Req... message ID : " << responseMsg[REQ_INDEX_MESSAGE_ID];
+	printf("message ID : %d\n", responseMsg[RESP_INDEX_MESSAGE_ID]);
+
+
     switch(testType)
     {
         case MESSAGE_ID_ALL_AUTO_TEST:
             fprintf(stderr, "call allAutoTest\n");
-            return TestCaseServer::allAutoTest();
+            responseMsg = TestCaseServer::allAutoTest();
             //emit QDBusPendingCallWatcher::finished(reply);
             //return "Fail";
             break;
         case MESSAGE_ID_AUDIO_TEST:
         {
-			return audioTestMain((testCaseID)msg[REQ_INDEX_TESTCASE_ID]);
+			responseMsg = audioTestMain((testCaseID)msg[REQ_INDEX_TESTCASE_ID]);
             break;
         }
         case MESSAGE_ID_BSP_TEST:
         {
-            return bspTestMain((testCaseID)msg[REQ_INDEX_TESTCASE_ID]);
+            responseMsg = bspTestMain((testCaseID)msg[REQ_INDEX_TESTCASE_ID]);
             break;
         }
         case MESSAGE_ID_VIDEO_TEST:
             break;
     }
-	return "OK";
+
+	//Temporary make msg for test.
+	responseMsg[RESP_INDEX_MESSAGE_ID] = msg[REQ_INDEX_MESSAGE_ID];
+	responseMsg[RESP_INDEX_MESSAGE_TYPE] = msg[REQ_INDEX_MESSAGE_TYPE];
+	responseMsg[RESP_INDEX_TESTCASE_ID] = msg[REQ_INDEX_TESTCASE_ID];
+	qDebug() << Q_FUNC_INFO << "message ID : " << responseMsg[RESP_INDEX_MESSAGE_ID];
+
+	return responseMsg;
 }
 
-QString TestCaseServer::audioTest1(const QString &arg)
+QByteArray TestCaseServer::audioTest1(const QString &arg)
 {
-    fprintf(stderr, "audioTest1 is called!! \n");
-    return QString("audioTest1(\"%1\") got called").arg(arg);
+	qDebug() << "audioTest1 is called!!";
+	return responseMsg;
 }
 
-QString TestCaseServer::audioTest2(const QString &arg)
+QByteArray TestCaseServer::audioTest2(const QString &arg)
 {
-    fprintf(stderr, "audioTest2 is called!! \n");
-    return QString("audioTest2(\"%1\") got called").arg(arg);
+	qDebug() << "audioTest2 is called!!";
+	return responseMsg;
 }
 
-QString TestCaseServer::audioTest3(const QString &arg)
+QByteArray TestCaseServer::audioTest3(const QString &arg)
 {
-    fprintf(stderr, "audioTest3 is called!! \n");
-    return QString("audioTest3(\"%1\") got called").arg(arg);
+	qDebug() << "audioTest3 is called!!";
+	return responseMsg;
 }
 
-Q_SCRIPTABLE QString TestCaseServer::audioTestMain(testCaseID tcID)
+
+
+QByteArray TestCaseServer::audioTestMain(testCaseID tcID)
 {
-    Q_SCRIPTABLE QString reply;
+    QByteArray reply;
     switch(tcID)
     {
         case TEST_CASE_ID_A1:
@@ -83,9 +103,9 @@ Q_SCRIPTABLE QString TestCaseServer::audioTestMain(testCaseID tcID)
 }
 
 
-Q_SCRIPTABLE QString TestCaseServer::bspTestMain(testCaseID tcID)
+QByteArray TestCaseServer::bspTestMain(testCaseID tcID)
 {
-    Q_SCRIPTABLE QString reply;
+    QByteArray reply;
     switch(tcID)
     {
         case TEST_CASE_ID_A1:
@@ -100,25 +120,28 @@ Q_SCRIPTABLE QString TestCaseServer::bspTestMain(testCaseID tcID)
     }
     return reply;
 }
-Q_SCRIPTABLE QString TestCaseServer::bspTest1(const QString &arg)
+
+QByteArray TestCaseServer::bspTest1(const QString &arg)
 {
-    fprintf(stderr, "bspTest1 is called!! \n");
-    return QString("bspTest1(\"%1\") got called").arg(arg);
-}
-Q_SCRIPTABLE QString TestCaseServer::bspTest2(const QString &arg)
-{
-    fprintf(stderr, "bspTest2 is called!! \n");
-    return QString("bspTest2(\"%1\") got called").arg(arg);
-}
-Q_SCRIPTABLE QString TestCaseServer::bspTest3(const QString &arg)
-{
-    fprintf(stderr, "bspTest3 is called!! \n");
-    return QString("bspTest3(\"%1\") got called").arg(arg);
+	qDebug() << "bspTest1 is called!!";
+	return responseMsg;
 }
 
-Q_SCRIPTABLE QString TestCaseServer::allAutoTest()
+QByteArray TestCaseServer::bspTest2(const QString &arg)
 {
-    Q_SCRIPTABLE QString reply;
+	qDebug() << "bspTest2 is called!!";
+	return responseMsg;
+}
+
+QByteArray TestCaseServer::bspTest3(const QString &arg)
+{
+	qDebug() << "bspTest3 is called!!";
+	return responseMsg;
+}
+
+QByteArray TestCaseServer::allAutoTest()
+{
+    QString reply;
     
     //Execute Test 1
     SampleThread *thread = new SampleThread;
@@ -134,10 +157,11 @@ Q_SCRIPTABLE QString TestCaseServer::allAutoTest()
 	//Send Message including test result for each test case to Client(HOW???)
 
     //return result if all test are completed
-	qDebug() << Q_FUNC_INFO << "work done in allAutoTest without thread";
+	qDebug() << Q_FUNC_INFO << "work done in allAutoTest";
 	
-	reply = "[Async] allAudoTest work done in thread";
-    return reply;
+	reply = "[Async] allAutoTest work done in thread";
+    //return reply;
+	return responseMsg;
 }
 
 void TestCaseServer::on_completeSimpleThread(const QString &result)

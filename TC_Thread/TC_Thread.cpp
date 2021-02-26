@@ -30,29 +30,51 @@ void SampleThread::run()
         }
         qDebug() << Q_FUNC_INFO << "sleep in Thread";
         QThread::sleep(1);
-    } 
+    }
     const QString reply = "Thread is completed. Test result is OK.";
     emit completeSimpleThread(reply);
 	qDebug() << Q_FUNC_INFO << "Complete Thread";
 }
 
-//TODO: implement response hanler
-/*
-ResponseHandlerThread::ResponseHandlerThread(TestCaseClient &tcClient)
+void ResponseHandlerThread::handleResponse(const QByteArray &msg)
 {
-	qDebug() << Q_FUNC_INFO << "create ReponseHandlerThread";
-	this->tc = tcClient;
+	mutex.lock();
+	qDebug() << Q_FUNC_INFO << "Enqueue response message";
+    responseQueue.enqueue(msg);
+	waitCondition.wakeOne();
+	mutex.unlock();
 }
 
 void ResponseHandlerThread::run()
 {
-	while (!tc.responseQueue.isEmpty())
+	QByteArray msg;
+	do
 	{
-		qDebug() << "Dequeue response";
-		qDebug() << Q_FUNC_INFO << tc.responseQueue.dequeue();
-	}
+		mutex.lock();
+		if (responseQueue.isEmpty()) {
+			waitCondition.wait(&mutex);
+		}
+		mutex.unlock();
+					 
+		if(mutex.tryLock())
+		{
+			qDebug() << Q_FUNC_INFO << "Dequeue response";
+			//mutex.lock();
+			//qDebug() << Q_FUNC_INFO << responseQueue.dequeue();
+			msg = responseQueue.dequeue();
+			mutex.unlock();
+		}
+		//handle msg
+		//qDebug() << Q_FUNC_INFO << "message ID : " << msg[RESP_INDEX_MESSAGE_ID];
+		//qDebug() << Q_FUNC_INFO << "message Type : " << msg[RESP_INDEX_MESSAGE_TYPE];
+		printf("message ID : %d\n", msg[RESP_INDEX_MESSAGE_ID]);
+		printf("meesage Type : %d\n", msg[RESP_INDEX_MESSAGE_TYPE]);
+//		qDebug() << Q_FUNC_INFO << "message  : " << msg[0];
+
+		qDebug() << "Just show again for Test...  Input TestType (BSP:11 Video:12 Radio:13 MCU:14 Ethernet:15 Audio:16  ALL:17)";
+	} while(true);
 }
-*/
+
 
 ClientInputThread::ClientInputThread()
 {
@@ -76,7 +98,7 @@ void ClientInputThread::run()
     int inputType;
     //TestCaseMessage msg;
     QByteArray msg;
-    msg.resize(REQ_IDEX_MAX_SIZE);
+    msg.resize(REQ_INDEX_MAX_SIZE);
     
     // open stdin for reading
     qstdin.open(stdin, QIODevice::ReadOnly);

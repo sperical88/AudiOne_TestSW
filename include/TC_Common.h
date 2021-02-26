@@ -11,6 +11,9 @@
 #define ASYNC_CALL
 //#define AUTO_START_SERVER
 
+
+using namespace std;
+
 typedef enum
 {
     REQ_INDEX_MESSAGE_ID,
@@ -18,8 +21,20 @@ typedef enum
     REQ_INDEX_CATEGORY_ID,
     REQ_INDEX_FUNCTION_ID,
     REQ_INDEX_TESTCASE_ID,
-    REQ_IDEX_MAX_SIZE
+    REQ_INDEX_MAX_SIZE
 } reqMessage;
+
+typedef enum
+{
+	RESP_INDEX_MESSAGE_ID,
+	RESP_INDEX_MESSAGE_TYPE,
+	RESP_INDEX_CATEGORY_ID,
+	RESP_INDEX_FUNCTION_ID,
+	RESP_INDEX_TESTCASE_ID,
+	RESP_INDEX_TEST_RESULT,
+	RESP_INDEX_ERROR_CODE,
+	RESP_INDEX_MAX_SIZE,
+} respMessage;
 
 typedef enum 
 {

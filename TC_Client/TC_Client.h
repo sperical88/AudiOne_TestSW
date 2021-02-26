@@ -5,6 +5,7 @@
 #include <QtCore/QFile>
 #include <QtDBus/QDBusInterface>
 #include <QtDBus/QDBusPendingCall>
+#include "../TC_Thread/TC_Thread.h"
 
 class TestCaseClient: public QObject
 {
@@ -27,7 +28,7 @@ public:
     QFile qstdin;
 	QDBusInterface *iface;
 	//TODO: implement response hanler
-	//QQueue<QString> responseQueue;
+	ResponseHandlerThread *responseHandler;
 
 private slots:
     void on_requestMsg(const QByteArray &);		//From UI Thread

@@ -18,25 +18,26 @@ public:
     TestCaseServer(QObject *obj) : QDBusAbstractAdaptor(obj)
     { }
 
-    Q_SCRIPTABLE QString audioTestMain(testCaseID tcID);
-    Q_SCRIPTABLE QString audioTest1(const QString &arg);
-    Q_SCRIPTABLE QString audioTest2(const QString &arg);
-    Q_SCRIPTABLE QString audioTest3(const QString &arg);
+    QByteArray audioTestMain(testCaseID tcID);
+    QByteArray audioTest1(const QString &arg);
+    QByteArray audioTest2(const QString &arg);
+    QByteArray audioTest3(const QString &arg);
 
-    Q_SCRIPTABLE QString bspTestMain(testCaseID tcID);
-    Q_SCRIPTABLE QString bspTest1(const QString &arg);
-    Q_SCRIPTABLE QString bspTest2(const QString &arg);
-    Q_SCRIPTABLE QString bspTest3(const QString &arg);
+    QByteArray bspTestMain(testCaseID tcID);
+    QByteArray bspTest1(const QString &arg);
+    QByteArray bspTest2(const QString &arg);
+    QByteArray bspTest3(const QString &arg);
 
-    Q_SCRIPTABLE QString allAutoTest();
+    QByteArray allAutoTest();
 
 public:
     QDBusInterface *iface;
+	QByteArray responseMsg;
 
 public slots:
     //Q_SCRIPTABLE QString reqTestFromClient(const int testType);
     //Q_SCRIPTABLE QString reqTestFromClient(const TestCaseMessage &msg);
-    Q_SCRIPTABLE QString reqTestFromClient(const QByteArray &msg);
+    QByteArray reqTestFromClient(const QByteArray &msg);
 
     void on_completeSimpleThread(const QString &);
 

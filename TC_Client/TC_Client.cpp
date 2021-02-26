@@ -19,22 +19,23 @@ void TestCaseClient::quit()
 
 void TestCaseClient::callFinishedSlot(QDBusPendingCallWatcher *call)
 {
-    printf("reqFinishedSlot\n");
+    qDebug() << Q_FUNC_INFO << "[Async] Received response from TestSW agent... ";
 
     //QDBusPendingReply<QString, QByteArray> reply = *call;
-    QDBusPendingReply<QString> reply = *call;
+    QDBusPendingReply<QByteArray> reply = *call;
     if (reply.isError()) {
         //showError();
-        printf("[Async] reply fail.\n");
+        qDebug() << Q_FUNC_INFO << "[Async] reply fail.";
     } else {
-        QString text = reply.argumentAt<0>();
-        //QByteArray data = reply.argumentAt<1>();
-        printf("[Async] Reply was: %s\n", qPrintable(text));
+		//QByteArray respMsg = reply.argumentAt<0>;
+		QByteArray respMsg = reply.value();
+        qDebug() << Q_FUNC_INFO << "[Async] Reply was succeed ";
 		//TODO : enqueue response
-		//responseQueue.enqueue(test);
+		//qDebug() << Q_FUNC_INFO << "message ID : " << respMsg[RESP_INDEX_MESSAGE_ID];
+		printf("message ID : %d\n", respMsg[RESP_INDEX_MESSAGE_ID]);
+		responseHandler->handleResponse(respMsg);
     }
     call->deleteLater();
-	qDebug() << "Input TestType (BSP:11 Video:12 Radio:13 MCU:14 Ethernet:15 Audio:16  ALL:17)";
 }
 
 void TestCaseClient::on_requestMsg(const QByteArray &msg)
@@ -44,7 +45,7 @@ void TestCaseClient::on_requestMsg(const QByteArray &msg)
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
     QObject::connect(watcher, SIGNAL(finished(QDBusPendingCallWatcher*)),
                  this, SLOT(callFinishedSlot(QDBusPendingCallWatcher*)));
-	printf("[AYSNC] return on_requestMsg.\n");
+	printf("[AYSNC] return imediately and wait for response from testSW agent. \n");
 }
 
 #ifdef AUTO_START_SERVER
@@ -91,6 +92,10 @@ void TestCaseClient::start()
     // Start thread
     qDebug() << Q_FUNC_INFO << "start Thread";
     thread->start();
+
+	responseHandler = new ResponseHandlerThread();
+	qDebug() << Q_FUNC_INFO << "start Response hanlder Thread";
+	responseHandler->start();
 }
 #endif
 

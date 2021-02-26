@@ -5,7 +5,8 @@
 #include <QtDBus/QtDBus>
 #include <QtCore/QFile>
 #include <QtCore/QQueue>
-#include "../TC_Client/TC_Client.h"
+#include <QtCore/QMutex>
+#include <QtCore/QWaitCondition>
 
 class SampleThread : public QThread
 {
@@ -22,22 +23,24 @@ signals:
 };
 
 //TODO: implement response hanler 
-/*
 class ResponseHandlerThread : public QThread
 {
 	Q_OBJECT
 public:
-	ResponseHandlerThread(TestCaseClient &tcClient);
-	~ResponseHandlerThread();
+//	ResponseHandlerThread();
+//	~ResponseHandlerThread();
+	void handleResponse(const QByteArray &msg);
 private:
-	TestCaseClient tc;
+	QQueue<QByteArray> responseQueue;
+	QWaitCondition waitCondition;
+	QMutex mutex;
 
 protected:
 	void run();
 signals:
 
 };
-*/
+
 
 class ClientInputThread : public QThread
 {
